@@ -67,6 +67,8 @@
 *****
 ****/
 
+void commandfile_yyerror(COMMANDFILE_T *pCommandFile,const char *pErrorString);
+int commandfile_yylex(void);
 
 
 /****
@@ -108,7 +110,7 @@
 %token TOKEN_AEND
 %token TOKEN_ALBUM
 %token TOKEN_ALBUMS
-%token TOKEN_ALGENFILE
+%token TOKEN_COMMANDFILE
 %token TOKEN_CAPTION
 %token TOKEN_CAPTIONFILE
 %token TOKEN_CAPTIONTEXT
@@ -136,7 +138,8 @@
 %type <pMediaList> mediastartcmd mediacmd
 %type <GUIData> guidatacmd guidatastartcmd
 %type <pMedia> imagecmd imagestartcmd
-%type <pCoordinate> coordinate1 coordinate2 coordinate3
+%type <pCoordinate> coordinate
+%type <Double> cvalue
 
 
 %%
@@ -153,7 +156,7 @@ command:
   albumscmd
   {
   }
-  | algenfilecmd
+  | commandfilecmd
   {
   }
   | mediacmd
@@ -166,7 +169,7 @@ command:
 albumscmd:
   albumsstartcmd TOKEN_AEND '\n'
   {
-    MESSAGELOG_Todo("albumsstartcmd TOKEN_AEND");
+    MESSAGELOG_Todo("albumscmd - albumsstartcmd TOKEN_AEND");
   }
   ;
 
@@ -176,44 +179,44 @@ albumsstartcmd:
   }
   | albumsstartcmd albumcmd
   {
-    MESSAGELOG_Todo("albumsstartcmd albumcmd");
+    MESSAGELOG_Todo("albumsstartcmd - albumsstartcmd albumcmd");
   }
   | TOKEN_ALBUMS '\n'
   {
-    MESSAGELOG_Todo("TOKEN_ALBUMS");
+    MESSAGELOG_Todo("albumsstartcmd - TOKEN_ALBUMS");
   }
   ;
 
 albumcmd:
   albumstartcmd TOKEN_AEND '\n'
   {
-    MESSAGELOG_Todo("albumstartcmd TOKEN_AEND");
+    MESSAGELOG_Todo("albumcmd - albumstartcmd TOKEN_AEND");
   }
   ;
 
 albumstartcmd:
   albumstartcmd '\n'
   {
-    MESSAGELOG_Todo("albumstartcmd");
+    MESSAGELOG_Todo("albumstartcmd - albumstartcmd");
   }
   | albumstartcmd TOKEN_DESCRIPTION TOKEN_STRING '\n'
   {
-    MESSAGELOG_Todo("albumstartcmd TOKEN_DESCRIPTION TOKEN_STRING");
+    MESSAGELOG_Todo("albumstartcmd - albumstartcmd TOKEN_DESCRIPTION TOKEN_STRING");
   }
   | albumstartcmd TOKEN_MEDIA TOKEN_STRING '\n'
   {
-    MESSAGELOG_Todo("albumstartcmd TOKEN_MEDIA TOKEN_STRING");
+    MESSAGELOG_Todo("albumstartcmd - albumstartcmd TOKEN_MEDIA TOKEN_STRING");
   }
   | TOKEN_ALBUM TOKEN_STRING '\n'
   {
-    MESSAGELOG_Todo("TOKEN_ALBUM TOKEN_STRING");
+    MESSAGELOG_Todo("albumstartcmd - TOKEN_ALBUM TOKEN_STRING");
   }
   ;
 
-algenfilecmd:
-  TOKEN_ALGENFILE TOKEN_STRING '\n'
+commandfilecmd:
+  TOKEN_COMMANDFILE TOKEN_STRING '\n'
   {
-    MESSAGELOG_Todo("TOKEN_ALGENFILE");
+    MESSAGELOG_Todo("commandfilecmd - TOKEN_COMMANDFILE");
   }
   ;
 
@@ -273,22 +276,17 @@ imagestartcmd:
   }
   | imagestartcmd TOKEN_LOCATION TOKEN_NONE '\n'
   {
-    MESSAGELOG_Todo("TOKEN_LOCATION TOKEN_NONE");
+    MESSAGELOG_Todo("imagestartcmd - imagestartcmd TOKEN_LOCATION TOKEN_NONE");
     $$=$1;
   }
   | imagestartcmd TOKEN_LOCATION TOKEN_LOCATIONTEXT '\n'
   {
-    MESSAGELOG_Todo("TOKEN_LOCATION TOKEN_LOCATIONTEXT");
+    MESSAGELOG_Todo("imagestartcmd - imagestartcmd TOKEN_LOCATION TOKEN_LOCATIONTEXT");
     $$=$1;
   }
-  | imagestartcmd coordinate3 '\n'
+  | imagestartcmd location '\n'
   {
-    MESSAGELOG_Todo("coordinate3");
-    $$=$1;
-  }
-  | imagestartcmd coordinate2 '\n'
-  {
-    MESSAGELOG_Todo("coordinate2");
+    MESSAGELOG_Todo("imagestartcmd - imagestartcmd location");
     $$=$1;
   }
   | imagestartcmd TOKEN_ROTATE TOKEN_INTEGER '\n'
@@ -351,42 +349,54 @@ guidatastartcmd:
   }
   ;
 
-coordinate3:
-  coordinate2 ',' TOKEN_DOUBLE
+location:
+  TOKEN_LOCATIONTEXT coordinate
   {
-    MESSAGELOG_Todo("coordinate2 ',' TOKEN_DOUBLE");
-    $$=$1;
+    MESSAGELOG_Todo("location - TOKEN_LOCATIONTEXT coordinate");
   }
-  | coordinate2 ',' TOKEN_INTEGER
+  ;
+
+coordinate:
+  coordinate3 ',' TOKEN_STRING
   {
-    MESSAGELOG_Todo("coordinate2 ',' TOKEN_INTEGER");
-    $$=$1;
+    MESSAGELOG_Todo("coordinate - coordinate3 ',' TOKEN_STRING");
+  }
+  | coordinate3
+  {
+    MESSAGELOG_Todo("coordinate - coordinate3");
+  }
+  | coordinate2 ',' TOKEN_STRING
+  {
+    MESSAGELOG_Todo("coordinate - coordinate2 ',' TOKEN_STRING");
+  }
+  | coordinate2
+  {
+    MESSAGELOG_Todo("coordinate - coordinate2");
+  }
+  ;
+
+coordinate3:
+  coordinate2 ',' cvalue
+  {
+    MESSAGELOG_Todo("coordinate3 - coordinate2 ',' cvalue");
   }
   ;
 
 coordinate2:
-  coordinate1 ',' TOKEN_DOUBLE
+  cvalue ',' cvalue
   {
-    MESSAGELOG_Todo("coordinate1 ',' TOKEN_DOUBLE");
-    $$=$1;
-  }
-  | coordinate1 ',' TOKEN_INTEGER
-  {
-    MESSAGELOG_Todo("coordinate1 ',' TOKEN_INTEGER");
-    $$=$1;
+    MESSAGELOG_Todo("coordinate2 - cvalue ',' cvalue");
   }
   ;
 
-coordinate1:
-  TOKEN_LOCATIONTEXT TOKEN_STRING ',' TOKEN_DOUBLE
+cvalue:
+  TOKEN_DOUBLE
   {
-    MESSAGELOG_Todo("TOKEN_LOCATIONTEXT TOKEN_STRING ',' TOKEN_DOUBLE");
     $$=$1;
   }
   |
-  TOKEN_LOCATIONTEXT TOKEN_STRING ',' TOKEN_INTEGER
+  TOKEN_INTEGER
   {
-    MESSAGELOG_Todo("TOKEN_LOCATIONTEXT TOKEN_STRING ',' TOKEN_INTEGER");
     $$=$1;
   }
   ;
