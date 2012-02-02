@@ -123,6 +123,7 @@ static size_t f_BufferSize;
 
 %option 8bit
 %option case-insensitive
+%option noinput
 %option nounput
 %option noyywrap
 %option prefix="commandfile_yy"
@@ -136,9 +137,9 @@ static size_t f_BufferSize;
 AEND                return(TOKEN_AEND);
 ALBUM               return(TOKEN_ALBUM);
 ALBUMS              return(TOKEN_ALBUMS);
-ALGENFILE           return(TOKEN_ALGENFILE);
 CAPTION             return(TOKEN_CAPTION);
 CAPTIONTEXT         return(TOKEN_CAPTIONTEXT);
+COMMANDFILE         return(TOKEN_COMMANDFILE);
 DATAFILE            return(TOKEN_DATAFILE);
 DESCRIPTION         return(TOKEN_DESCRIPTION);
 GEND                return(TOKEN_GEND);
